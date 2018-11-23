@@ -179,9 +179,11 @@ class Generator:
                                       name = 'G_output')
             f.print_shape(self.output)
 
-            self.optimizer = tf.train.AdamOptimizer(learning_rate=cf.G_LEARNING_RATE,
-                                                    beta1 = cf.BETA_1,
-                                                    name='G_optimizer')
+            #self.optimizer = tf.train.AdamOptimizer(learning_rate=cf.G_LEARNING_RATE,
+            #                                        beta1 = cf.BETA_1,
+            #                                        name='G_optimizer')
+            self.optimizer = tf.train.RMSPropOptimizer(learning_rate = cf.G_LEARNING_RATE,
+                                                       name = 'G_optimizer')
 
             self.C.set_input_from_generator(self)
         return

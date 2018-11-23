@@ -8,8 +8,8 @@
 import numpy as np
 
 # このセッションのデスクリプション
-DESC = 'WGAN-ver1'
-DESC += '-01-lungHRCT-runtest'
+DESC = 'WGAN-ver2'
+DESC += '-03-lungHRCT-runtest-clip0.04-maceGPU'
 
 # 結果格納用ディレクトリ
 RESULTDIR = './results/'
@@ -30,7 +30,7 @@ TRAIN_DATA_NUMBER = 20000
 PIXELSIZE = 64
 
 # 何ミニバッチごとにサンプルを保存するか
-SAVE_SAMPLE_MINIBATCH = 250
+SAVE_SAMPLE_MINIBATCH = 150
 
 # 教師用 保存データセットのプレフィクス
 TRAIN_PREFIX = 'HRCT32'
@@ -82,7 +82,7 @@ DATASET_PARALLEL_CALLS = 4
 RESTART_TRAINING = True
 
 # Critic変数のクリッピング閾値
-CLIP_THRESHOLD = 0.01
+CLIP_THRESHOLD = 0.04
 
 # ログ用の設定
 import logging

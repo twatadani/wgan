@@ -42,9 +42,12 @@ class Critic:
 
             norm_factor = tf.constant(255.0, dtype=tf.float32,
                                       shape = (cf.MINIBATCHSIZE, cf.PIXELSIZE, cf.PIXELSIZE, 1))
-            inreshaped = tf.divide(tf.reshape(input,
-                                              shape = (-1, cf.PIXELSIZE, cf.PIXELSIZE, 1),
-                                              name = 'C_inreshaped'), norm_factor)
+            #inreshaped = tf.divide(tf.reshape(input,
+            #                                  shape = (-1, cf.PIXELSIZE, cf.PIXELSIZE, 1),
+            #                                  name = 'C_inreshaped'), norm_factor)
+            inreshaped = tf.reshape(input,
+                                    shape = (-1, cf.PIXELSIZE, cf.PIXELSIZE, 1),
+                                    name = 'C_inreshaped')
 
             c1 = 'C_conv1'
             conv1 = f.apply_dobn(tf.layers.conv2d(inputs = inreshaped,
@@ -53,7 +56,7 @@ class Critic:
                                                   strides = (2, 2),
                                                   padding = 'same',
                                                   use_bias = cf.USE_BIAS,
-                                                  kernel_initializer = tf.keras.initializers.he_normal(),
+                                                  kernel_initializer = tf.initializers.random_uniform(minval=-cf.CLIP_THRESHOLD, maxval=cf.CLIP_THRESHOLD),
                                                   activation = tf.nn.leaky_relu,
                                                   name = c1),
                                  c1)
@@ -66,7 +69,7 @@ class Critic:
                                                   strides = (2, 2),
                                                   padding = 'same',
                                                   use_bias = cf.USE_BIAS,
-                                                  kernel_initializer = tf.keras.initializers.he_normal(),
+                                                  kernel_initializer = tf.initializers.random_uniform(minval=-cf.CLIP_THRESHOLD, maxval=cf.CLIP_THRESHOLD),
                                                   activation = tf.nn.leaky_relu,
                                                   name = c2),
                                  c2)
@@ -79,7 +82,7 @@ class Critic:
                                                   strides = (2, 2),
                                                   padding = 'same',
                                                   use_bias = cf.USE_BIAS,
-                                                  kernel_initializer = tf.keras.initializers.he_normal(),
+                                                  kernel_initializer = tf.initializers.random_uniform(minval=-cf.CLIP_THRESHOLD, maxval=cf.CLIP_THRESHOLD),
                                                   activation = tf.nn.leaky_relu,
                                                   name = c3),
                                  c3)
@@ -92,7 +95,7 @@ class Critic:
                                                   strides = (2, 2),
                                                   padding = 'same',
                                                   use_bias = cf.USE_BIAS,
-                                                  kernel_initializer = tf.keras.initializers.he_normal(),
+                                                  kernel_initializer = tf.initializers.random_uniform(minval=-cf.CLIP_THRESHOLD, maxval=cf.CLIP_THRESHOLD),
                                                   activation = tf.nn.leaky_relu,
                                                   name = c4),
                                  c4)
@@ -109,7 +112,7 @@ class Critic:
                                                       strides = (1, 1),
                                                       padding = 'valid',
                                                       use_bias = cf.USE_BIAS,
-                                                      kernel_initializer = tf.keras.initializers.he_normal(),
+                                                      kernel_initializer = tf.initializers.random_uniform(minval=-cf.CLIP_THRESHOLD, maxval=cf.CLIP_THRESHOLD),
                                                       activation = tf.nn.leaky_relu,
                                                       name = cfinal),
                                      cfinal)
@@ -117,16 +120,6 @@ class Critic:
 
             return tf.reshape(convfinal,
                               shape = (-1, 1))
-
-            #fc = 'C_fully_connected'
-            #fully_connected = f.apply_dobn(tf.layers.dense(inputs = flatten,
-            #                                               units = 1,
-            #                                               kernel_initializer = tf.keras.initializers.he_normal(),
-            #                                               activation = tf.nn.sigmoid,
-            #                                               name = fc),
-            #fc)
-            #f.print_shape(fully_connected)
-            #return fully_connected
 
     def define_graph(self):
         '''discriminatorの計算グラフを定義する'''
@@ -141,7 +134,7 @@ class Critic:
 
             #ones = tf.ones_like(self.p_real)
 
-            self.loss = tf.reduce_mean(self.p_real) - tf.reduce_mean(self.p_fake)
+            self.loss = tf.reduce_mean(self.p_fake) - tf.reduce_mean(self.p_real)
 
             #self.loss = tf.reduce_mean(tf.add(
             #    tf.nn.l2_loss(tf.subtract(self.p_real, ones)),
@@ -155,9 +148,13 @@ class Critic:
                             for p in C_vars]
                     
             
-            self.optimizer = tf.train.AdamOptimizer(learning_rate = cf.C_LEARNING_RATE,
-                                                    beta1 = cf.BETA_1,
-                                                    name = 'C_optimizer')
+            #self.optimizer = tf.train.AdamOptimizer(learning_rate = cf.C_LEARNING_RATE,
+            #                                        beta1 = cf.BETA_1,
+            #name = 'C_optimizer')
+            self.optimizer = tf.train.RMSPropOptimizer(learning_rate = cf.C_LEARNING_RATE,
+                                                       name = 'C_optimizer')
+
+
             self.train_op = self.optimizer.minimize(self.loss,
                                                     global_step=self.global_step_tensor,
                                                     var_list=C_vars,
